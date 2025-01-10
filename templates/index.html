@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management System</title>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Container for the page */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Header Styling */
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        /* Book creation form */
+        #book-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input, textarea, button {
+            padding: 10px;
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        input, textarea {
+            width: 100%;
+        }
+
+        button {
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Book List Styling */
+        .book-list {
+            margin-top: 30px;
+        }
+
+        .book {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .book:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .book h3 {
+            margin-top: 0;
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+
+        .book p {
+            font-size: 1.1em;
+            color: #7f8c8d;
+        }
+
+        /* Buttons inside books */
+        .book button {
+            margin-top: 10px;
+            background-color: #e74c3c;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .book button.edit {
+            background-color: #f39c12;
+        }
+
+        .book button:hover {
+            background-color: #c0392b;
+        }
+
+        .book button.edit:hover {
+            background-color: #e67e22;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .book-list {
+                margin-top: 20px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Main container for the page -->
+    <div class="container">
+        <h1>Book Management System</h1>
+
+        <!-- Book creation form -->
+        <form id="book-form">
+            <input type="text" id="title" placeholder="Enter book title" required>
+            <input type="text" id="author" placeholder="Enter author name" required>
+            <input type="text" id="genre" placeholder="Enter genre">
+            <input type="number" id="year" placeholder="Enter publication year">
+            <button type="submit">Add Book</button>
+        </form>
+
+        <!-- Book list display -->
+        <div class="book-list" id="book-list"></div>
+    </div>
+
+    <script>
+        // Fetch and display books
+        async function fetchBooks() {
+            const response = await fetch('/books');
+            const books = await response.json();
+            const bookList = document.getElementById('book-list');
+            bookList.innerHTML = '';
+            books.forEach(book => {
+                const bookElement = document.createElement('div');
+                bookElement.classList.add('book');
+                bookElement.innerHTML = `
+                    <h3>${book.title}</h3>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                    <p><strong>Genre:</strong> ${book.genre || 'No genre available'}</p>
+                    <p><strong>Year:</strong> ${book.year || 'No year available'}</p>
+                    <button class="edit" onclick="editBook(${book.id})">Edit</button>
+                    <button onclick="deleteBook(${book.id})">Delete</button>
+                `;
+                bookList.appendChild(bookElement);
+            });
+        }
+
+        // Create a book
+        document.getElementById('book-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+            const genre = document.getElementById('genre').value;
+            const year = document.getElementById('year').value;
+            const response = await fetch('/books', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, author, genre, year })
+            });
+            await response.json();
+            fetchBooks();  // Refresh the book list
+            document.getElementById('title').value = '';
+            document.getElementById('author').value = '';
+            document.getElementById('genre').value = '';
+            document.getElementById('year').value = '';
+        });
+
+        // Delete a book
+        async function deleteBook(id) {
+            await fetch(`/books/${id}`, { method: 'DELETE' });
+            fetchBooks();  // Refresh the book list
+        }
+
+        // Edit a book (For simplicity, this example uses prompts to update book details)
+        async function editBook(id) {
+            const newTitle = prompt('Enter new book title:');
+            const newAuthor = prompt('Enter new author name:');
+            const newGenre = prompt('Enter new genre:');
+            const newYear = prompt('Enter new publication year:');
+            await fetch(`/books/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: newTitle, author: newAuthor, genre: newGenre, year: newYear })
+            });
+            fetchBooks();  // Refresh the book list
+        }
+
+        // Load books on initial page load
+        fetchBooks();
+    </script>
+
+</body>
+</html>
