@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Book Management System</title>
+    <title>Task Management</title>
     <style>
         /* General Body Styling */
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f4f6f9;
+            background-color: #1e1e2f;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            color: #f5f5f5;
         }
 
         /* Container for the page */
@@ -19,21 +20,21 @@
             max-width: 800px;
             margin: 40px auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: #2b2b3c;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         /* Header Styling */
         h1 {
             text-align: center;
-            color: #333;
+            color: #f1c40f;
             font-size: 2.5em;
             margin-bottom: 20px;
         }
 
-        /* Book creation form */
-        #book-form {
+        /* Task creation form */
+        #task-form {
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -42,12 +43,16 @@
         input, textarea, button {
             padding: 10px;
             font-size: 1em;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             border-radius: 4px;
+            background-color: #1e1e2f;
+            color: #f5f5f5;
         }
 
-        input, textarea {
-            width: 100%;
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #f1c40f;
+            box-shadow: 0 0 5px #f1c40f;
         }
 
         button {
@@ -67,55 +72,55 @@
             min-height: 100px;
         }
 
-        /* Book List Styling */
-        .book-list {
+        /* Task List Styling */
+        .task-list {
             margin-top: 30px;
         }
 
-        .book {
-            background-color: #ecf0f1;
+        .task {
+            background-color: #3c3c4c;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 15px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .book:hover {
+        .task:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .book h3 {
+        .task h3 {
             margin-top: 0;
             font-size: 1.5em;
-            color: #2c3e50;
+            color: #f39c12;
         }
 
-        .book p {
+        .task p {
             font-size: 1.1em;
-            color: #7f8c8d;
+            color: #bdc3c7;
         }
 
-        /* Buttons inside books */
-        .book button {
+        /* Buttons inside tasks */
+        .task button {
             margin-top: 10px;
             background-color: #e74c3c;
             font-size: 0.9em;
             transition: background-color 0.3s;
         }
 
-        .book button.edit {
+        .task button.edit {
             background-color: #f39c12;
         }
 
-        .book button:hover {
+        .task button:hover {
             background-color: #c0392b;
         }
 
-        .book button.edit:hover {
+        .task button.edit:hover {
             background-color: #e67e22;
         }
-
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -127,7 +132,7 @@
                 font-size: 2em;
             }
 
-            .book-list {
+            .task-list {
                 margin-top: 20px;
             }
         }
@@ -138,85 +143,75 @@
 
     <!-- Main container for the page -->
     <div class="container">
-        <h1>Book Management System</h1>
+        <h1>Task Management System</h1>
 
-        <!-- Book creation form -->
-        <form id="book-form">
-            <input type="text" id="title" placeholder="Enter book title" required>
-            <input type="text" id="author" placeholder="Enter author name" required>
-            <input type="text" id="genre" placeholder="Enter genre">
-            <input type="number" id="year" placeholder="Enter publication year">
-            <button type="submit">Add Book</button>
+        <!-- Task creation form -->
+        <form id="task-form">
+            <input type="text" id="title" placeholder="Enter task title" required>
+            <textarea id="description" placeholder="Enter task description"></textarea>
+            <button type="submit">Add Task</button>
         </form>
 
-        <!-- Book list display -->
-        <div class="book-list" id="book-list"></div>
+        <!-- Task list display -->
+        <div class="task-list" id="task-list"></div>
     </div>
 
     <script>
-        // Fetch and display books
-        async function fetchBooks() {
-            const response = await fetch('/books');
-            const books = await response.json();
-            const bookList = document.getElementById('book-list');
-            bookList.innerHTML = '';
-            books.forEach(book => {
-                const bookElement = document.createElement('div');
-                bookElement.classList.add('book');
-                bookElement.innerHTML = `
-                    <h3>${book.title}</h3>
-                    <p><strong>Author:</strong> ${book.author}</p>
-                    <p><strong>Genre:</strong> ${book.genre || 'No genre available'}</p>
-                    <p><strong>Year:</strong> ${book.year || 'No year available'}</p>
-                    <button class="edit" onclick="editBook(${book.id})">Edit</button>
-                    <button onclick="deleteBook(${book.id})">Delete</button>
+        // Fetch and display tasks
+        async function fetchTasks() {
+            const response = await fetch('/tasks');
+            const tasks = await response.json();
+            const taskList = document.getElementById('task-list');
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.classList.add('task');
+                taskElement.innerHTML = `
+                    <h3>${task.title}</h3>
+                    <p>${task.description || 'No description available'}</p>
+                    <button class="edit" onclick="editTask(${task.id})">Edit</button>
+                    <button onclick="deleteTask(${task.id})">Delete</button>
                 `;
-                bookList.appendChild(bookElement);
+                taskList.appendChild(taskElement);
             });
         }
 
-        // Create a book
-        document.getElementById('book-form').addEventListener('submit', async (e) => {
+        // Create a task
+        document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('title').value;
-            const author = document.getElementById('author').value;
-            const genre = document.getElementById('genre').value;
-            const year = document.getElementById('year').value;
-            const response = await fetch('/books', {
+            const description = document.getElementById('description').value;
+            const response = await fetch('/tasks', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, author, genre, year })
+                body: JSON.stringify({ title, description })
             });
             await response.json();
-            fetchBooks();  // Refresh the book list
+            fetchTasks();  // Refresh the task list
             document.getElementById('title').value = '';
-            document.getElementById('author').value = '';
-            document.getElementById('genre').value = '';
-            document.getElementById('year').value = '';
+            document.getElementById('description').value = '';
         });
 
-        // Delete a book
-        async function deleteBook(id) {
-            await fetch(`/books/${id}`, { method: 'DELETE' });
-            fetchBooks();  // Refresh the book list
+        // Delete a task
+        async function deleteTask(id) {
+            await fetch(`/tasks/${id}`, { method: 'DELETE' });
+            fetchTasks();  // Refresh the task list
         }
 
-        // Edit a book (For simplicity, this example uses prompts to update book details)
-        async function editBook(id) {
-            const newTitle = prompt('Enter new book title:');
-            const newAuthor = prompt('Enter new author name:');
-            const newGenre = prompt('Enter new genre:');
-            const newYear = prompt('Enter new publication year:');
-            await fetch(`/books/${id}`, {
+        // Edit a task (For simplicity, this example uses prompts to update task)
+        async function editTask(id) {
+            const newTitle = prompt('Enter new task title:');
+            const newDescription = prompt('Enter new task description:');
+            await fetch(`/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: newTitle, author: newAuthor, genre: newGenre, year: newYear })
+                body: JSON.stringify({ title: newTitle, description: newDescription })
             });
-            fetchBooks();  // Refresh the book list
+            fetchTasks();  // Refresh the task list
         }
 
-        // Load books on initial page load
-        fetchBooks();
+        // Load tasks on initial page load
+        fetchTasks();
     </script>
 
 </body>
